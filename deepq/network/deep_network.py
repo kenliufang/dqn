@@ -299,3 +299,19 @@ class DeepQNet(object):
                 saver.restore(sess=sess, save_path=model_file)
             if final_file:
                 saver.save(sess=sess, save_path=final_file)
+
+    def play(self, model_prefix):
+        session = tf.Session()
+        with session.as_default() as sess:
+            act = self.build_act()
+            saver = tf.train.Saver()
+            saver.restore(sess, save_path=model_prefix)
+
+            obs, done = self.env.reset(), False
+            episode_rew = 0
+            while not done:
+                self.env.render()
+                action, _ = act(obs.__array__()[None], 0)
+                obs, rew, done, _ = self.env.step(action[0])
+                episode_rew += rew
+            return episode_rew
